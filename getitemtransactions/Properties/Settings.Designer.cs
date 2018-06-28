@@ -22,5 +22,15 @@ namespace getitemtransactions.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://open.api.ebay.com/shopping")]
+        public string getitemtransactions_com_ebay_developer_Shopping {
+            get {
+                return ((string)(this["getitemtransactions_com_ebay_developer_Shopping"]));
+            }
+        }
     }
 }

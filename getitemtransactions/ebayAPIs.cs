@@ -1,12 +1,16 @@
 ﻿using eBay.Service.Call;
 using eBay.Service.Core.Sdk;
 using eBay.Service.Core.Soap;
+using getitemtransactions.com.ebay.developer;
+using getitemtransactions.Models;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace getitemtransactions
 {
@@ -76,6 +80,66 @@ namespace getitemtransactions
 
             return r;
         }
+        // Purpose of GetSingleItem is to fetch properties such as a listing's description and photos
+        // it is used when performing an auto-listing
+        public static async Task<SellerOrderHistory> GetSingleItem(string itemId)
+        {
+            //StringReader sr;
+            string output;
+            try
+            {
+                string appID = ConfigurationManager.AppSettings["AppID"];
+                //DataModelsDB db = new DataModelsDB();
+                //var profile = db.UserProfiles.Find(user.Id);
 
+                Shopping svc = new Shopping();
+                // set the URL and it's parameters
+                svc.Url = string.Format("http://open.api.ebay.com/shopping?callname=GetSingleItem&IncludeSelector=Description,ItemSpecifics&appid={0}&version=515&ItemID={1}", appID, itemId);
+                // create a new request type
+                GetSingleItemRequestType request = new GetSingleItemRequestType();
+                // create a new response type
+                GetSingleItemResponseType response = new GetSingleItemResponseType();
+
+                string uri = svc.Url;
+                using (HttpClient httpClient = new HttpClient())
+                {
+                    string s = await httpClient.GetStringAsync(uri);
+                    s = s.Replace("\"", "'");
+                    output = s.Replace(" xmlns='urn:ebay:apis:eBLBaseComponents'", string.Empty);
+
+                    XElement root = XElement.Parse(output);
+                    var qryRecords = from record in root.Elements("Item")
+                                     select record;
+                    var r = (from r2 in qryRecords
+                             select new
+                             {
+                                 Description = r2.Element("Description"),
+                                 Title = r2.Element("Title"),
+                                 Price = r2.Element("ConvertedCurrentPrice"),
+                                 ListingUrl = r2.Element("ViewItemURLForNaturalSearch"),
+                                 PrimaryCategoryID = r2.Element("PrimaryCategoryID"),
+                                 PrimaryCategoryName = r2.Element("PrimaryCategoryName")
+                             }).Single();
+
+                    var list = qryRecords.Elements("PictureURL")
+                           .Select(element => element.Value)
+                           .ToArray();
+
+                    var si = new SellerOrderHistory();
+                    si.PictureUrl = Util.ListToDelimited(list, ';');
+                    si.Title = r.Title.Value;
+                    si.Description = r.Description.Value;
+                    si.EbaySellerPrice = r.Price.Value;
+                    si.EbayUrl = r.ListingUrl.Value;
+                    si.PrimaryCategoryID = r.PrimaryCategoryID.Value;
+                    si.PrimaryCategoryName = r.PrimaryCategoryName.Value;
+                    return si;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw (ex);
+            }
+        }
     }
 }
