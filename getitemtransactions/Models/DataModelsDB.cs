@@ -18,6 +18,7 @@ namespace getitemtransactions.Models
         public DbSet<EbaySamsSellerMap> SamsSellerResult { get; set; }
         public DbSet<SellerOrderHistory> EbayOrders { get; set; }
         public DbSet<SamsClubItem> SamsItems { get; set; }
+        public DbSet<vwSellerMap> SellerMap { get; set; }
 
         public void StoreOrder(SellerOrderHistory order)
         {
@@ -26,7 +27,7 @@ namespace getitemtransactions.Models
         }
         public void RemoveOrder(string ebayItemId)
         {
-            Database.ExecuteSqlCommand("delete from ebaySamsSellerMap where ebayItemId = '" + ebayItemId + "'");
+            Database.ExecuteSqlCommand("delete from SellerOrderHistory where itemId = '" + ebayItemId + "'");
         }
     }
 }

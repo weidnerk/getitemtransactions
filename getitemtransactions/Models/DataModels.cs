@@ -4,11 +4,23 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace getitemtransactions.Models
 {
+    [Table("vwSellerMap")]
+    public class vwSellerMap
+    {
+        public string EbayTitle { get; set; }
+        public string SamsTitle { get; set; }
+        public string EbayUrl { get; set; }
+        public string SamsUrl { get; set; }
+        public int CategoryId { get; set; }
+        [Key]
+        public string EbayItemID { get; set; }
+        public string SamsItemID { get; set; }
+    }
     [Table("SamsClubItems")]
     public class SamsClubItem
     {
         public string Title { get; set; }
-        public string Price { get; set; }
+        public decimal Price { get; set; }
         public string Url { get; set; }
         public string Limit { get; set; }
         public string SeoAvgRating { get; set; }
@@ -24,7 +36,7 @@ namespace getitemtransactions.Models
         public int ID { get; set; }
         public int SourceID { get; set; }
         public string Title { get; set; }
-        public string EbaySellerPrice { get; set; }
+        public decimal EbaySellerPrice { get; set; }
         public string Qty { get; set; }
         //public string DateOfPurchaseStr { get; set; }
         public DateTime? DateOfPurchase { get; set; }

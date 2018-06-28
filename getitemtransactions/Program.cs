@@ -21,18 +21,19 @@ namespace getitemtransactions
 
         static void Main(string[] args)
         {
+            int categoryId = 2;
             Task.Run(async () =>
             {
-                await Process();
+                await Process(categoryId);
             }).Wait();
 
             //Console.ReadKey();
         }
 
-        static async Task Process()
+        static async Task Process(int categoryId)
         {
-            var orderHistory = ScanMap();
-            foreach (SellerOrderHistory o in orderHistory.Where(r => r.ItemId== "201154699665"))
+            var orderHistory = ScanMap(categoryId);
+            foreach (SellerOrderHistory o in orderHistory)
             {
                 o.SourceID = 1;     // sam's
                 o.Title = GetSamsTitle(o.SupplierItemId);
@@ -41,6 +42,7 @@ namespace getitemtransactions
                 o.PrimaryCategoryName = singleitem.PrimaryCategoryName;
                 o.Description = singleitem.Description;
                 o.PictureUrl = singleitem.PictureUrl;
+                o.EbaySellerPrice = singleitem.EbaySellerPrice;
 
                 db.RemoveOrder(o.ItemId);
                 db.StoreOrder(o);
@@ -63,15 +65,15 @@ namespace getitemtransactions
             return title;
         }
 
-        static List<SellerOrderHistory> ScanMap()
+        static List<SellerOrderHistory> ScanMap(int categoryId)
         {
             int i = 0;
             var allHistory = new List<SellerOrderHistory>();
             var orderHistory = new List<SellerOrderHistory>();
-            foreach (EbaySamsSellerMap item in db.SamsSellerResult.ToList())
+            foreach (vwSellerMap item in db.SellerMap.Where(r => r.CategoryId == categoryId).ToList())
             {
-                Console.WriteLine((++i).ToString() + "/" + db.SamsSellerResult.Count().ToString() + " " + item.EbayItemId);
-                orderHistory = getTransactions(item.EbayItemId, item.SamsClubItemId, item.EbayUrl);
+                Console.WriteLine((++i).ToString() + "/" + db.SamsSellerResult.Count().ToString() + " " + item.EbayItemID);
+                orderHistory = getTransactions(item.EbayItemID, item.SamsItemID, item.EbayUrl);
                 if (orderHistory.Count > 0)
                     allHistory.AddRange(orderHistory);
             }
@@ -97,7 +99,7 @@ namespace getitemtransactions
                     //order.Title = searchItem.title;
                     order.Qty = item.QuantityPurchased.ToString();
                     
-                    order.EbaySellerPrice = item.TransactionPrice.Value.ToString();
+                    order.EbaySellerPrice = (decimal)item.TransactionPrice.Value;
 
                     order.DateOfPurchase = item.CreatedDate;
                     order.EbayUrl = viewItemUrl;
