@@ -29,5 +29,10 @@ namespace getitemtransactions.Models
         {
             Database.ExecuteSqlCommand("delete from SellerOrderHistory where itemId = '" + ebayItemId + "'");
         }
+
+        public void RemoveOrders(int categoryId)
+        {
+            Database.ExecuteSqlCommand("delete from SellerOrderHistory where CategoryId = " + categoryId);
+        }
     }
 }

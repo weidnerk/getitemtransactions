@@ -28,6 +28,9 @@ namespace getitemtransactions.Models
         public string SeoReviewCount { get; set; }
         [Key]
         public string ItemId { get; set; }
+        public string Description { get; set; }
+        public int CategoryId { get; set; }
+
     }
 
     [Table("SellerOrderHistory")]
@@ -51,6 +54,9 @@ namespace getitemtransactions.Models
         public string PrimaryCategoryName { get; set; }
         public string PictureUrl { get; set; }
         public string Description { get; set; }
+        public int CategoryId { get; set; }
+        public string SourceDescription { get; set; }
+        public string EbaySeller { get; set; }
     }
 
     [Table("EbaySamsSellerMap")]
@@ -62,5 +68,6 @@ namespace getitemtransactions.Models
         public string SamsClubItemId { get; set; }
         public string EbayUrl { get; set; }
         public string Title { get; set; }
+        public int CategoryId { get; set; }
     }
 }

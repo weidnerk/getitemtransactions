@@ -1,5 +1,5 @@
 /*
- * needs an assembly reference to C:\Program Files (x86)\eBay\eBay .NET SDK v1027 Release\eBay.Service.dll
+ * Needs an assembly reference to C:\Program Files (x86)\eBay\eBay .NET SDK v1027 Release\eBay.Service.dll
  * to use GetItemTransactions
  * 
  */
@@ -21,7 +21,7 @@ namespace getitemtransactions
 
         static void Main(string[] args)
         {
-            int categoryId = 2;
+            int categoryId = 4;
             Task.Run(async () =>
             {
                 await Process(categoryId);
@@ -32,23 +32,31 @@ namespace getitemtransactions
 
         static async Task Process(int categoryId)
         {
-            var orderHistory = ScanMap(categoryId);
+            db.RemoveOrders(categoryId);
+            var orderHistory = GetOrders(categoryId);
             foreach (SellerOrderHistory o in orderHistory)
             {
                 o.SourceID = 1;     // sam's
-                o.Title = GetSamsTitle(o.SupplierItemId);
+                var samsItem = GetSamsItem(o.SupplierItemId);
+                var sellerItem = GetSellerItem(o.ItemId);
+                o.Title = samsItem.Title;
+                o.SourceDescription = samsItem.Description;
+                o.SupplierItemId = samsItem.ItemId;
+
                 var singleitem = await ebayAPIs.GetSingleItem(o.ItemId);
                 o.PrimaryCategoryID = singleitem.PrimaryCategoryID;
                 o.PrimaryCategoryName = singleitem.PrimaryCategoryName;
                 o.Description = singleitem.Description;
                 o.PictureUrl = singleitem.PictureUrl;
-                o.EbaySellerPrice = singleitem.EbaySellerPrice;
+                // o.EbaySellerPrice = singleitem.EbaySellerPrice; // need to check accuracy
+                o.EbaySeller = sellerItem.EbaySeller;
+                o.CategoryId = categoryId;
 
-                db.RemoveOrder(o.ItemId);
+                //db.RemoveOrder(o.ItemId);
                 db.StoreOrder(o);
 
                 Console.WriteLine("~~~~~~~~~ ebay id: " + o.ItemId);
-                Console.WriteLine(GetSamsTitle(o.ItemId));     // can get title from OrderHistory table
+                Console.WriteLine(samsItem.Title);
                 Console.WriteLine(o.EbaySellerPrice);
                 Console.WriteLine(o.Qty);
                 Console.WriteLine(o.DateOfPurchase);
@@ -56,35 +64,42 @@ namespace getitemtransactions
             }
         }
 
-        static string GetSamsTitle(string ebayItemId)
+        static SamsClubItem GetSamsItem(string samsItemId)
         {
-            string title = null;
-            var s = db.SamsItems.Where(r => r.ItemId == ebayItemId).FirstOrDefault();
-            if (s != null)
-                title = s.Title;
-            return title;
+            var s = db.SamsItems.Where(r => r.ItemId == samsItemId).FirstOrDefault();
+            return s;
+        }
+        static EbaySamsSellerMap GetSellerItem(string sellerItemId)
+        {
+            var s = db.SamsSellerResult.Where(r => r.EbayItemId == sellerItemId).FirstOrDefault();
+            return s;
         }
 
-        static List<SellerOrderHistory> ScanMap(int categoryId)
+        // Iterate sellers
+        static List<SellerOrderHistory> GetOrders(int categoryId)
         {
+            Random rnd = new Random();
+            int batchId = rnd.Next(1, 1000000);
+
             int i = 0;
             var allHistory = new List<SellerOrderHistory>();
             var orderHistory = new List<SellerOrderHistory>();
+            int count = db.SellerMap.Where(r => r.CategoryId == categoryId).ToList().Count;
             foreach (vwSellerMap item in db.SellerMap.Where(r => r.CategoryId == categoryId).ToList())
             {
-                Console.WriteLine((++i).ToString() + "/" + db.SamsSellerResult.Count().ToString() + " " + item.EbayItemID);
-                orderHistory = getTransactions(item.EbayItemID, item.SamsItemID, item.EbayUrl);
+                Console.WriteLine((++i).ToString() + "/" + count.ToString() + " " + item.EbayItemID);
+                orderHistory = GetTransactions(item.EbayItemID, item.SamsItemID, item.EbayUrl, batchId);
                 if (orderHistory.Count > 0)
                     allHistory.AddRange(orderHistory);
             }
             return allHistory;
         }
 
-        static List<SellerOrderHistory> getTransactions(string ebayItemId, string supplierItemId, string viewItemUrl)
+        // Get the orders for an ebay item id
+        static List<SellerOrderHistory> GetTransactions(string ebayItemId, string supplierItemId, string viewItemUrl, int categoryId)
         {
             DateTime ModTimeTo = DateTime.Now.ToUniversalTime();
             DateTime ModTimeFrom = ModTimeTo.AddDays(-30);
-
             var transactions = ebayAPIs.GetItemTransactions(ebayItemId, ModTimeFrom, ModTimeTo);
             var orderHistory = new List<SellerOrderHistory>();
 
