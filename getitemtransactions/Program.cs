@@ -7,6 +7,7 @@
 
 using eBay.Service.Core.Soap;
 using getitemtransactions.Models;
+using sclib.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +19,7 @@ namespace getitemtransactions
     class Program
     {
         static DataModelsDB db = new DataModelsDB();
+        static samsDB samsdb = new samsDB();
 
         static void Main(string[] args)
         {
@@ -66,7 +68,7 @@ namespace getitemtransactions
 
         static SamsClubItem GetSamsItem(string samsItemId)
         {
-            var s = db.SamsItems.Where(r => r.ItemId == samsItemId).FirstOrDefault();
+            var s = samsdb.SamsItems.Where(r => r.ItemId == samsItemId).FirstOrDefault();
             return s;
         }
         static EbaySamsSellerMap GetSellerItem(string sellerItemId)

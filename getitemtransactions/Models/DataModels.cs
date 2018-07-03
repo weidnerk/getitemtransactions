@@ -16,22 +16,6 @@ namespace getitemtransactions.Models
         public string EbayItemID { get; set; }
         public string SamsItemID { get; set; }
     }
-    [Table("SamsClubItems")]
-    public class SamsClubItem
-    {
-        public string Title { get; set; }
-        public decimal Price { get; set; }
-        public string Url { get; set; }
-        public string Limit { get; set; }
-        public string SeoAvgRating { get; set; }
-        public string SeoBestRating { get; set; }
-        public string SeoReviewCount { get; set; }
-        [Key]
-        public string ItemId { get; set; }
-        public string Description { get; set; }
-        public int CategoryId { get; set; }
-
-    }
 
     [Table("SellerOrderHistory")]
     public class SellerOrderHistory

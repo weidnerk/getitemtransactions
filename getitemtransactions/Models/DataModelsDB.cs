@@ -17,7 +17,6 @@ namespace getitemtransactions.Models
 
         public DbSet<EbaySamsSellerMap> SamsSellerResult { get; set; }
         public DbSet<SellerOrderHistory> EbayOrders { get; set; }
-        public DbSet<SamsClubItem> SamsItems { get; set; }
         public DbSet<vwSellerMap> SellerMap { get; set; }
 
         public void StoreOrder(SellerOrderHistory order)
