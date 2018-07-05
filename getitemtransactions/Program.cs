@@ -23,7 +23,7 @@ namespace getitemtransactions
 
         static void Main(string[] args)
         {
-            int categoryId = 6;
+            int categoryId = 3;
             Task.Run(async () =>
             {
                 await Process(categoryId);
