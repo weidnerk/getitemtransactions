@@ -23,12 +23,18 @@ namespace getitemtransactions
 
         static void Main(string[] args)
         {
-            int categoryId = 6;
-            Task.Run(async () =>
+            if (args == null || args.Count() == 0)
             {
-                await Process(categoryId);
-            }).Wait();
-
+                Console.WriteLine("please provide a category");
+            }
+            else
+            {
+                int categoryId = Convert.ToInt32(args[0]);
+                Task.Run(async () =>
+                {
+                    await Process(categoryId);
+                }).Wait();
+            }
             //Console.ReadKey();
         }
 
