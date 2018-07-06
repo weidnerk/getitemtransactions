@@ -65,7 +65,6 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Util.cs" />
     <Compile Include="Web References\com.ebay.developer\Reference.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -137,6 +136,10 @@
     </WebReferenceUrl>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\dsutil\dsutil.csproj">
+      <Project>{7fa17f92-860b-4367-ab69-a3a417a29a79}</Project>
+      <Name>dsutil</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\sclib\sclib\sclib.csproj">
       <Project>{9dc462a5-ded7-468c-b53c-5a0d59c7dc21}</Project>
       <Name>sclib</Name>

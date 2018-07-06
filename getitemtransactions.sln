@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "getitemtransactions", "geti
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sclib", "..\sclib\sclib\sclib.csproj", "{9DC462A5-DED7-468C-B53C-5A0D59C7DC21}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dsutil", "..\dsutil\dsutil.csproj", "{7FA17F92-860B-4367-AB69-A3A417A29A79}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{9DC462A5-DED7-468C-B53C-5A0D59C7DC21}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9DC462A5-DED7-468C-B53C-5A0D59C7DC21}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9DC462A5-DED7-468C-B53C-5A0D59C7DC21}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7FA17F92-860B-4367-AB69-A3A417A29A79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FA17F92-860B-4367-AB69-A3A417A29A79}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FA17F92-860B-4367-AB69-A3A417A29A79}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FA17F92-860B-4367-AB69-A3A417A29A79}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

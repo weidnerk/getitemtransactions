@@ -132,7 +132,7 @@ namespace getitemtransactions
                         .ToArray();
 
                 var si = new SellerOrderHistory();
-                si.PictureUrl = Util.ListToDelimited(list, ';');
+                si.PictureUrl = dsutil.DSUtil.ListToDelimited(list, ';');
                 si.Title = r.Title.Value;
                 si.Description = r.Description.Value;
                 si.EbaySellerPrice = parsePrice(r.Price.Value);
