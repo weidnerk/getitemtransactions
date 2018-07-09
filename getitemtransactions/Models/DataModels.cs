@@ -41,6 +41,7 @@ namespace getitemtransactions.Models
         public int CategoryId { get; set; }
         public string SourceDescription { get; set; }
         public string EbaySeller { get; set; }
+        public decimal ShippingAmount { get; set; }
     }
 
     [Table("EbaySamsSellerMap")]

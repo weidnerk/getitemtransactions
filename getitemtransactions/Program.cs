@@ -123,6 +123,7 @@ namespace getitemtransactions
                     order.Qty = item.QuantityPurchased.ToString();
                     
                     order.EbaySellerPrice = (decimal)item.TransactionPrice.Value;
+                    order.ShippingAmount = (decimal)item.ActualShippingCost.Value;
 
                     order.DateOfPurchase = item.CreatedDate;
                     order.EbayUrl = viewItemUrl;
