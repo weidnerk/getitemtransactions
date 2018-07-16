@@ -15,6 +15,7 @@ namespace getitemtransactions.Models
         [Key]
         public string EbayItemID { get; set; }
         public string SamsItemID { get; set; }
+        public bool IsMultiVariationListing { get; set; }
     }
 
     [Table("SellerOrderHistory")]

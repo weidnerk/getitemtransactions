@@ -20,9 +20,12 @@ namespace getitemtransactions
     {
         static DataModelsDB db = new DataModelsDB();
         static samsDB samsdb = new samsDB();
+        private static string Log_File = "log.txt";
 
         static void Main(string[] args)
         {
+            int count = 0;
+            string msg = null;
             if (args == null || args.Count() == 0)
             {
                 Console.WriteLine("please provide a category");
@@ -30,15 +33,29 @@ namespace getitemtransactions
             else
             {
                 int categoryId = Convert.ToInt32(args[0]);
-                Task.Run(async () =>
+                try
                 {
-                    await Process(categoryId);
-                }).Wait();
+                    Task.Run(async () =>
+                    {
+                        msg = "start processing category " + categoryId;
+                        dsutil.DSUtil.WriteFile(Log_File, msg);
+
+                        count = await Process(categoryId);
+
+                        msg = "processed " + count.ToString() + " items";
+                        dsutil.DSUtil.WriteFile(Log_File, msg);
+
+                    }).Wait();
+                }
+                catch (Exception exc)
+                {
+                    dsutil.DSUtil.WriteFile(Log_File, exc.Message);
+                }
             }
             //Console.ReadKey();
         }
 
-        static async Task Process(int categoryId)
+        static async Task<int> Process(int categoryId)
         {
             db.RemoveOrders(categoryId);
             var orderHistory = GetOrders(categoryId);
@@ -70,6 +87,7 @@ namespace getitemtransactions
                 Console.WriteLine(o.DateOfPurchase);
                 Console.WriteLine("");
             }
+            return orderHistory.Count();
         }
 
         static SamsClubItem GetSamsItem(string samsItemId)
@@ -93,7 +111,9 @@ namespace getitemtransactions
             var allHistory = new List<SellerOrderHistory>();
             var orderHistory = new List<SellerOrderHistory>();
             int count = db.SellerMap.Where(r => r.CategoryId == categoryId).ToList().Count;
-            foreach (vwSellerMap item in db.SellerMap.Where(r => r.CategoryId == categoryId).ToList())
+
+            // for now, not including variation listings
+            foreach (vwSellerMap item in db.SellerMap.Where(r => r.CategoryId == categoryId && !r.IsMultiVariationListing).ToList())
             {
                 Console.WriteLine((++i).ToString() + "/" + count.ToString() + " " + item.EbayItemID);
                 orderHistory = GetTransactions(item.EbayItemID, item.SamsItemID, item.EbayUrl, batchId);
