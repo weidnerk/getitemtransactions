@@ -117,8 +117,11 @@ namespace getitemtransactions
             {
                 Console.WriteLine((++i).ToString() + "/" + count.ToString() + " " + item.EbayItemID);
                 orderHistory = GetTransactions(item.EbayItemID, item.SamsItemID, item.EbayUrl, batchId);
-                if (orderHistory.Count > 0)
-                    allHistory.AddRange(orderHistory);
+                if (orderHistory != null)
+                {
+                    if (orderHistory.Count > 0)
+                        allHistory.AddRange(orderHistory);
+                }
             }
             return allHistory;
         }
@@ -129,43 +132,47 @@ namespace getitemtransactions
             DateTime ModTimeTo = DateTime.Now.ToUniversalTime();
             DateTime ModTimeFrom = ModTimeTo.AddDays(-30);
             var transactions = ebayAPIs.GetItemTransactions(ebayItemId, ModTimeFrom, ModTimeTo);
-            var orderHistory = new List<SellerOrderHistory>();
-
-            foreach (TransactionType item in transactions)
+            if (transactions != null)
             {
-                // did it sell?
-                if (item.MonetaryDetails != null)
-                {
-                    var pmtTime = item.MonetaryDetails.Payments.Payment[0].PaymentTime;
-                    var pmtAmt = item.MonetaryDetails.Payments.Payment[0].PaymentAmount.Value;
-                    var order = new SellerOrderHistory();
-                    //order.Title = searchItem.title;
-                    order.Qty = item.QuantityPurchased.ToString();
-                    
-                    order.EbaySellerPrice = (decimal)item.TransactionPrice.Value;
-                    order.ShippingAmount = (decimal)item.ActualShippingCost.Value;
+                var orderHistory = new List<SellerOrderHistory>();
 
-                    order.DateOfPurchase = item.CreatedDate;
-                    order.EbayUrl = viewItemUrl;
-                    //order.ImageUrl = searchItem.galleryURL;
-                    //var pictures = searchItem.pictureURLLarge;
-                    //order.PageNumber = pg;
-                    order.ItemId = ebayItemId;
-                    order.SupplierItemId = supplierItemId;
-                    // testing GetSingleItem
-                    // purpose of GetSingleItem is to fetch properties like listing descriptiong
-                    // it is used when performing an auto-listing
-                    // var r = await GetSingleItem(order.ItemId, user);
-
-                    orderHistory.Add(order);
-                }
-                else
+                foreach (TransactionType item in transactions)
                 {
-                    // i don't see this ever being executed which makes sense if querying only sold items
-                    //HomeController.WriteFile(_logfile, "Unexpected: item.MonetaryDetails == null");
+                    // did it sell?
+                    if (item.MonetaryDetails != null)
+                    {
+                        var pmtTime = item.MonetaryDetails.Payments.Payment[0].PaymentTime;
+                        var pmtAmt = item.MonetaryDetails.Payments.Payment[0].PaymentAmount.Value;
+                        var order = new SellerOrderHistory();
+                        //order.Title = searchItem.title;
+                        order.Qty = item.QuantityPurchased.ToString();
+
+                        order.EbaySellerPrice = (decimal)item.TransactionPrice.Value;
+                        order.ShippingAmount = (decimal)item.ActualShippingCost.Value;
+
+                        order.DateOfPurchase = item.CreatedDate;
+                        order.EbayUrl = viewItemUrl;
+                        //order.ImageUrl = searchItem.galleryURL;
+                        //var pictures = searchItem.pictureURLLarge;
+                        //order.PageNumber = pg;
+                        order.ItemId = ebayItemId;
+                        order.SupplierItemId = supplierItemId;
+                        // testing GetSingleItem
+                        // purpose of GetSingleItem is to fetch properties like listing descriptiong
+                        // it is used when performing an auto-listing
+                        // var r = await GetSingleItem(order.ItemId, user);
+
+                        orderHistory.Add(order);
+                    }
+                    else
+                    {
+                        // i don't see this ever being executed which makes sense if querying only sold items
+                        //HomeController.WriteFile(_logfile, "Unexpected: item.MonetaryDetails == null");
+                    }
                 }
+                return orderHistory;
             }
-            return orderHistory;
+            else return null;
         }
     }
 }
