@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace getitemtransactions.Models
 {
-    [Table("vwSellerMap")]
+    //[Table("vwSellerMap")]
     public class vwSellerMap
     {
         public string EbayTitle { get; set; }

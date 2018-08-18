@@ -10,6 +10,7 @@ using getitemtransactions.Models;
 using sclib.Models;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -52,7 +53,7 @@ namespace getitemtransactions
                     dsutil.DSUtil.WriteFile(Log_File, exc.Message);
                 }
             }
-            //Console.ReadKey();
+            Console.ReadKey();
         }
 
         static async Task<int> Process(int categoryId)
@@ -85,6 +86,7 @@ namespace getitemtransactions
                 Console.WriteLine(o.EbaySellerPrice);
                 Console.WriteLine(o.Qty);
                 Console.WriteLine(o.DateOfPurchase);
+                Console.WriteLine(o.EbaySeller);
                 Console.WriteLine("");
             }
             return orderHistory.Count();
@@ -110,11 +112,21 @@ namespace getitemtransactions
             int i = 0;
             var allHistory = new List<SellerOrderHistory>();
             var orderHistory = new List<SellerOrderHistory>();
-            int count = db.SellerMap.Where(r => r.CategoryId == categoryId).ToList().Count;
 
+            List<vwSellerMap> data =
+                db.Database.SqlQuery<vwSellerMap>(
+                "select * from dbo.fnSellerMap(@categoryId)",
+                new SqlParameter("@categoryId", categoryId))
+            .ToList();
+            int count = data.Count;
             // for now, not including variation listings
-            foreach (vwSellerMap item in db.SellerMap.Where(r => r.CategoryId == categoryId && !r.IsMultiVariationListing).ToList())
+            foreach (vwSellerMap item in data.Where(r => r.CategoryId == categoryId && !r.IsMultiVariationListing).ToList())
             {
+                if (item.SamsItemID == "980043352")
+                {
+                    int hold = 999;
+                }
+
                 Console.WriteLine((++i).ToString() + "/" + count.ToString() + " " + item.EbayItemID);
                 orderHistory = GetTransactions(item.EbayItemID, item.SamsItemID, item.EbayUrl, batchId);
                 if (orderHistory != null)
@@ -125,6 +137,35 @@ namespace getitemtransactions
             }
             return allHistory;
         }
+
+        //static List<SellerOrderHistory> GetOrders_Orig(int categoryId)
+        //{
+        //    Random rnd = new Random();
+        //    int batchId = rnd.Next(1, 1000000);
+
+        //    int i = 0;
+        //    var allHistory = new List<SellerOrderHistory>();
+        //    var orderHistory = new List<SellerOrderHistory>();
+        //    int count = db.SellerMap.Where(r => r.CategoryId == categoryId).ToList().Count;
+
+        //    // for now, not including variation listings
+        //    foreach (vwSellerMap item in db.SellerMap.Where(r => r.CategoryId == categoryId && !r.IsMultiVariationListing).ToList())
+        //    {
+        //        if (item.EbayItemID == "183321220253")
+        //        {
+        //            int xyz = 999;
+        //        }
+
+        //        Console.WriteLine((++i).ToString() + "/" + count.ToString() + " " + item.EbayItemID);
+        //        orderHistory = GetTransactions(item.EbayItemID, item.SamsItemID, item.EbayUrl, batchId);
+        //        if (orderHistory != null)
+        //        {
+        //            if (orderHistory.Count > 0)
+        //                allHistory.AddRange(orderHistory);
+        //        }
+        //    }
+        //    return allHistory;
+        //}
 
         // Get the orders for an ebay item id
         static List<SellerOrderHistory> GetTransactions(string ebayItemId, string supplierItemId, string viewItemUrl, int categoryId)
