@@ -18,6 +18,19 @@ namespace getitemtransactions.Models
         public bool IsMultiVariationListing { get; set; }
     }
 
+    public class vwWalSellerMap
+    {
+        public string EbayTitle { get; set; }
+        public string WalTitle { get; set; }
+        public string EbayUrl { get; set; }
+        public string WalUrl { get; set; }
+        public int CategoryId { get; set; }
+        [Key]
+        public string EbayItemID { get; set; }
+        public string WalItemID { get; set; }
+        public bool IsMultiVariationListing { get; set; }
+    }
+
     [Table("SellerOrderHistory")]
     public class SellerOrderHistory
     {

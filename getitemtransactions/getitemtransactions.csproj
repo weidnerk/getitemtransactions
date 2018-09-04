@@ -144,6 +144,10 @@
       <Project>{9dc462a5-ded7-468c-b53c-5a0d59c7dc21}</Project>
       <Name>sclib</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\wallib\wallib\wallib.csproj">
+      <Project>{cd20dfe3-8d85-435a-a129-9319bc47a348}</Project>
+      <Name>wallib</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

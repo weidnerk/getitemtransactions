@@ -14,6 +14,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using wallib.Models;
 
 namespace getitemtransactions
 {
@@ -21,6 +22,7 @@ namespace getitemtransactions
     {
         static DataModelsDB db = new DataModelsDB();
         static samsDB samsdb = new samsDB();
+        static walDB waldb = new walDB();
         private static string Log_File = "log.txt";
 
         static void Main(string[] args)
@@ -42,6 +44,7 @@ namespace getitemtransactions
                         dsutil.DSUtil.WriteFile(Log_File, msg);
 
                         count = await Process(categoryId);
+                        count = await WalProcess(categoryId);
 
                         msg = "processed " + count.ToString() + " items";
                         dsutil.DSUtil.WriteFile(Log_File, msg);
@@ -54,6 +57,42 @@ namespace getitemtransactions
                 }
             }
             Console.ReadKey();
+        }
+
+        static async Task<int> WalProcess(int categoryId)
+        {
+            db.RemoveOrders(categoryId);
+            var orderHistory = GetWalOrders(categoryId);
+            foreach (SellerOrderHistory o in orderHistory)
+            {
+                o.SourceID = 2;
+                var walItem = GetWalItem(o.SupplierItemId);
+                var sellerItem = GetWalSellerItem(o.ItemId);
+                o.Title = walItem.Title;
+                o.SourceDescription = walItem.Description;
+                o.SupplierItemId = walItem.ItemId;
+
+                var singleitem = await ebayAPIs.GetSingleItem(o.ItemId);
+                o.PrimaryCategoryID = singleitem.PrimaryCategoryID;
+                o.PrimaryCategoryName = singleitem.PrimaryCategoryName;
+                o.Description = singleitem.Description;
+                o.PictureUrl = singleitem.PictureUrl;
+                // o.EbaySellerPrice = singleitem.EbaySellerPrice; // need to check accuracy
+                o.EbaySeller = sellerItem.EbaySeller;
+                o.CategoryId = categoryId;
+
+                //db.RemoveOrder(o.ItemId);
+                db.StoreOrder(o);
+
+                Console.WriteLine("~~~~~~~~~ ebay id: " + o.ItemId);
+                Console.WriteLine(walItem.Title);
+                Console.WriteLine(o.EbaySellerPrice);
+                Console.WriteLine(o.Qty);
+                Console.WriteLine(o.DateOfPurchase);
+                Console.WriteLine(o.EbaySeller);
+                Console.WriteLine("");
+            }
+            return orderHistory.Count();
         }
 
         static async Task<int> Process(int categoryId)
@@ -92,6 +131,12 @@ namespace getitemtransactions
             return orderHistory.Count();
         }
 
+        static WalItem GetWalItem(string walItemId)
+        {
+            var s = waldb.WalItems.Where(r => r.ItemId == walItemId).FirstOrDefault();
+            return s;
+        }
+
         static SamsClubItem GetSamsItem(string samsItemId)
         {
             var s = samsdb.SamsItems.Where(r => r.ItemId == samsItemId).FirstOrDefault();
@@ -100,6 +145,11 @@ namespace getitemtransactions
         static EbaySamsSellerMap GetSellerItem(string sellerItemId)
         {
             var s = db.SamsSellerResult.Where(r => r.EbayItemId == sellerItemId).FirstOrDefault();
+            return s;
+        }
+        static WalMap GetWalSellerItem(string sellerItemId)
+        {
+            var s = waldb.WalMapItems.Where(r => r.EbayItemId == sellerItemId).FirstOrDefault();
             return s;
         }
 
@@ -129,6 +179,35 @@ namespace getitemtransactions
 
                 Console.WriteLine((++i).ToString() + "/" + count.ToString() + " " + item.EbayItemID);
                 orderHistory = GetTransactions(item.EbayItemID, item.SamsItemID, item.EbayUrl, batchId);
+                if (orderHistory != null)
+                {
+                    if (orderHistory.Count > 0)
+                        allHistory.AddRange(orderHistory);
+                }
+            }
+            return allHistory;
+        }
+
+        static List<SellerOrderHistory> GetWalOrders(int categoryId)
+        {
+            Random rnd = new Random();
+            int batchId = rnd.Next(1, 1000000);
+
+            int i = 0;
+            var allHistory = new List<SellerOrderHistory>();
+            var orderHistory = new List<SellerOrderHistory>();
+
+            List<vwWalSellerMap> data =
+                db.Database.SqlQuery<vwWalSellerMap>(
+                "select * from dbo.fnWalSellerMap(@categoryId)",
+                new SqlParameter("@categoryId", categoryId))
+            .ToList();
+            int count = data.Count;
+            // for now, not including variation listings
+            foreach (vwWalSellerMap item in data.Where(r => r.CategoryId == categoryId && !r.IsMultiVariationListing).ToList())
+            {
+                Console.WriteLine((++i).ToString() + "/" + count.ToString() + " " + item.EbayItemID);
+                orderHistory = GetTransactions(item.EbayItemID, item.WalItemID, item.EbayUrl, batchId);
                 if (orderHistory != null)
                 {
                     if (orderHistory.Count > 0)
