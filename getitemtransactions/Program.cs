@@ -43,7 +43,7 @@ namespace getitemtransactions
                         msg = "start processing category " + categoryId;
                         dsutil.DSUtil.WriteFile(Log_File, msg);
 
-                        count = await Process(categoryId);
+                        //count = await Process(categoryId);
                         count = await WalProcess(categoryId);
 
                         msg = "processed " + count.ToString() + " items";
