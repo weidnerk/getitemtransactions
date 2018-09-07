@@ -56,7 +56,7 @@ namespace getitemtransactions
                     dsutil.DSUtil.WriteFile(Log_File, exc.Message);
                 }
             }
-            Console.ReadKey();
+            //Console.ReadKey();
         }
 
         static async Task<int> WalProcess(int categoryId)
